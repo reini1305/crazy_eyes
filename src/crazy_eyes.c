@@ -2,6 +2,19 @@
 
 static Layer *hands_layer;
 static Window *window;
+static int8_t charge_percentage = 100;
+static bool bluetooth_connected = true;
+
+static void handle_battery(BatteryChargeState battery)
+{
+   charge_percentage =  battery.charge_percent ;
+   layer_mark_dirty(hands_layer);
+}
+
+static void handle_bluetooth(bool connected){
+  bluetooth_connected = connected;
+  layer_mark_dirty(hands_layer);
+}
 
 static void hands_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
@@ -11,17 +24,15 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   const int16_t pupil_radius = 8;
   const int16_t eye_distance = 6;
   const int16_t pupil_center_dist = eye_radius - pupil_radius - 4;
+  const int16_t offset = (watch_info_get_model() == WATCH_INFO_MODEL_PEBBLE_STEEL) ? 12:0;
   
   GPoint left_eye_center = center;
   GPoint right_eye_center = center;
   
   left_eye_center.x-=eye_radius+eye_distance;
   right_eye_center.x+=eye_radius+eye_distance;
-  
-  if (watch_info_get_model() == WATCH_INFO_MODEL_PEBBLE_STEEL) {
-    left_eye_center.y+=12;
-    right_eye_center.y+=12;
-  }
+  left_eye_center.y+=offset;
+  right_eye_center.y+=offset;
   
   // draw the eye circles
 #ifdef PBL_COLOR
@@ -30,7 +41,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorBlack);
 #endif
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
-  
+  graphics_context_set_stroke_color(ctx,GColorWhite);
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_circle(ctx,left_eye_center, eye_radius);
   graphics_fill_circle(ctx,right_eye_center, eye_radius);
@@ -66,6 +77,36 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   minute_center.x+=2;minute_center.y-=2;
   graphics_fill_circle(ctx,hour_center, 2);
   graphics_fill_circle(ctx,minute_center, 2);
+  
+  // Draw the eyebrows
+  int16_t charge_diff = (charge_percentage /5) -10;
+  int16_t bluetooth_diff_x = bluetooth_connected? 0:eye_radius;
+  int16_t bluetooth_diff_y = bluetooth_connected? 0:charge_diff/2;
+  GPoint left = {
+    .x = (int16_t) left_eye_center.x-eye_radius+bluetooth_diff_x,
+    .y = (int16_t) left_eye_center.y-eye_radius-20-charge_diff+bluetooth_diff_y,
+  };
+  
+  GPoint right = {
+    .x = (int16_t) left_eye_center.x+eye_radius,
+    .y = (int16_t) left_eye_center.y-eye_radius-20+charge_diff,
+  };
+  
+  graphics_draw_line(ctx,left,right);
+#ifndef PBL_COLOR
+  left.y--;right.y--;
+  graphics_draw_line(ctx,left,right);
+#endif  
+  left.x = (int16_t) right_eye_center.x-eye_radius;
+  left.y = (int16_t) right_eye_center.y-eye_radius-20+charge_diff;
+  right.x = (int16_t) right_eye_center.x+eye_radius-bluetooth_diff_x;
+  right.y = (int16_t) right_eye_center.y-eye_radius-20-charge_diff+bluetooth_diff_y,
+ 
+  graphics_draw_line(ctx,left,right);
+#ifndef PBL_COLOR
+  left.y--;right.y--;
+  graphics_draw_line(ctx,left,right);
+#endif 
 }
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
@@ -75,6 +116,12 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
+  
+  bluetooth_connection_service_subscribe(handle_bluetooth);
+  handle_bluetooth(bluetooth_connection_service_peek());
+  
+  battery_state_service_subscribe(handle_battery);
+  handle_battery(battery_state_service_peek());
 
   // init hands
   hands_layer = layer_create(bounds);
