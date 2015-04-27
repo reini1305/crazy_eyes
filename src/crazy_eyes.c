@@ -117,12 +117,6 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
   
-  bluetooth_connection_service_subscribe(handle_bluetooth);
-  handle_bluetooth(bluetooth_connection_service_peek());
-  
-  battery_state_service_subscribe(handle_battery);
-  handle_battery(battery_state_service_peek());
-
   // init hands
   hands_layer = layer_create(bounds);
   layer_set_update_proc(hands_layer, hands_update_proc);
@@ -133,6 +127,12 @@ static void window_load(Window *window) {
   struct tm *t = localtime(&now);
   handle_tick(t, MINUTE_UNIT);
   tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
+  
+  bluetooth_connection_service_subscribe(handle_bluetooth);
+  handle_bluetooth(bluetooth_connection_service_peek());
+  
+  battery_state_service_subscribe(handle_battery);
+  handle_battery(battery_state_service_peek());
 }
 
 static void window_unload(Window *window) {
