@@ -5,6 +5,7 @@ static Layer *hands_layer;
 static Window *window;
 static int8_t charge_percentage = 100;
 static bool bluetooth_connected = true;
+static bool first_time = true;
 
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
@@ -19,6 +20,9 @@ static void handle_battery(BatteryChargeState battery)
 
 static void handle_bluetooth(bool connected){
   bluetooth_connected = connected;
+  if(getVibrate() && !connected)
+    vibes_long_pulse();
+  first_time = false;
   layer_mark_dirty(hands_layer);
 }
 

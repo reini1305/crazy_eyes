@@ -2,7 +2,8 @@
   "appKeys": {
     "eyebrows": 1,
     "angryness": 2,
-    "bluetooth": 3
+    "bluetooth": 3,
+    "vibrate": 4
   },
   "preferences": {
     "embedded": true,
@@ -29,6 +30,14 @@
               {
               "name": "bluetooth",
               "title": "Show bluetooth status?",
+              "type": "boolean",
+              "off-text": "No",
+              "on-text": "Yes",
+              "default": true
+              },
+              {
+              "name": "vibrate",
+              "title": "Vibrate on bluetooth disconnect?",
               "type": "boolean",
               "off-text": "No",
               "on-text": "Yes",
