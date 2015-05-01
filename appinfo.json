@@ -1,9 +1,43 @@
 {
-    "appKeys": {
-        "dummy": 0
-    },
+  "appKeys": {
+    "eyebrows": 1,
+    "angryness": 2,
+    "bluetooth": 3
+  },
+  "preferences": {
+    "embedded": true,
+    "debug": false,
+    "url": "http://musikkapelle-hollenegg.at/images/autoconfig.html",
+    "description": "If you like what I'm doing, consider a donation: <br><a href='https://pledgie.com/campaigns/28156'><img alt='Click here to lend your support to: Christian Reinbachers Pebble Apps and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/28156.png?skin_name=chrome' border='0' ></a>",
+    "items": [
+              {
+              "name": "eyebrows",
+              "title": "Show eyebrows?",
+              "type": "boolean",
+              "off-text": "No",
+              "on-text": "Yes",
+              "default": true
+              },
+              {
+              "name": "angryness",
+              "title": "Angryness of eyebrows: 0=desperate ... 10=angry, 11=battery level",
+              "type": "integer",
+              "min": 0,
+              "max": 11,
+              "default": 11
+              },
+              {
+              "name": "bluetooth",
+              "title": "Show bluetooth status?",
+              "type": "boolean",
+              "off-text": "No",
+              "on-text": "Yes",
+              "default": true
+              }
+              ]
+  },
     "capabilities": [
-        ""
+        "configurable"
     ],
     "companyName": "Christian Reinbacher",
     "longName": "Crazy Eyes",
@@ -25,8 +59,8 @@
         "basalt"
     ],
     "uuid": "c044c365-a5f0-4316-9208-1130d7a2c1e7",
-    "versionCode": 1,
-    "versionLabel": "1.1",
+    "versionCode": 2,
+    "versionLabel": "1.2",
     "watchapp": {
         "watchface": true
     }

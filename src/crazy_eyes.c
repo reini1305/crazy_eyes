@@ -1,10 +1,16 @@
 #include <pebble.h>
+#include "autoconfig.h"
 
 static Layer *hands_layer;
 static Window *window;
 static int8_t charge_percentage = 100;
 static bool bluetooth_connected = true;
 
+
+static void in_received_handler(DictionaryIterator *iter, void *context) {
+  autoconfig_in_received_handler(iter, context);
+  layer_mark_dirty(hands_layer);
+}
 static void handle_battery(BatteryChargeState battery)
 {
    charge_percentage =  battery.charge_percent ;
@@ -78,35 +84,38 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   graphics_fill_circle(ctx,hour_center, 2);
   graphics_fill_circle(ctx,minute_center, 2);
   
-  // Draw the eyebrows
-  int16_t charge_diff = (charge_percentage /5) -10;
-  int16_t bluetooth_diff_x = bluetooth_connected? 0:eye_radius;
-  int16_t bluetooth_diff_y = bluetooth_connected? 0:charge_diff/2;
-  GPoint left = {
-    .x = (int16_t) left_eye_center.x-eye_radius+bluetooth_diff_x,
-    .y = (int16_t) left_eye_center.y-eye_radius-20-charge_diff+bluetooth_diff_y,
-  };
-  
-  GPoint right = {
-    .x = (int16_t) left_eye_center.x+eye_radius,
-    .y = (int16_t) left_eye_center.y-eye_radius-20+charge_diff,
-  };
-  
-  graphics_draw_line(ctx,left,right);
-#ifndef PBL_COLOR
-  left.y--;right.y--;
-  graphics_draw_line(ctx,left,right);
-#endif  
-  left.x = (int16_t) right_eye_center.x-eye_radius;
-  left.y = (int16_t) right_eye_center.y-eye_radius-20+charge_diff;
-  right.x = (int16_t) right_eye_center.x+eye_radius-bluetooth_diff_x;
-  right.y = (int16_t) right_eye_center.y-eye_radius-20-charge_diff+bluetooth_diff_y,
- 
-  graphics_draw_line(ctx,left,right);
-#ifndef PBL_COLOR
-  left.y--;right.y--;
-  graphics_draw_line(ctx,left,right);
-#endif 
+  if(getEyebrows()) {
+    // Draw the eyebrows
+    int16_t angryness = getAngryness();
+    int16_t charge_diff = (angryness == 11) ? ((charge_percentage /5) -10) : (angryness*2-10);
+    int16_t bluetooth_diff_x = (bluetooth_connected||!getBluetooth())? 0:eye_radius;
+    int16_t bluetooth_diff_y = (bluetooth_connected||!getBluetooth())? 0:charge_diff/2;
+    GPoint left = {
+      .x = (int16_t) left_eye_center.x-eye_radius+bluetooth_diff_x,
+      .y = (int16_t) left_eye_center.y-eye_radius-20-charge_diff+bluetooth_diff_y,
+    };
+    
+    GPoint right = {
+      .x = (int16_t) left_eye_center.x+eye_radius,
+      .y = (int16_t) left_eye_center.y-eye_radius-20+charge_diff,
+    };
+    
+    graphics_draw_line(ctx,left,right);
+  #ifndef PBL_COLOR
+    left.y--;right.y--;
+    graphics_draw_line(ctx,left,right);
+  #endif  
+    left.x = (int16_t) right_eye_center.x-eye_radius;
+    left.y = (int16_t) right_eye_center.y-eye_radius-20+charge_diff;
+    right.x = (int16_t) right_eye_center.x+eye_radius-bluetooth_diff_x;
+    right.y = (int16_t) right_eye_center.y-eye_radius-20-charge_diff+bluetooth_diff_y,
+   
+    graphics_draw_line(ctx,left,right);
+  #ifndef PBL_COLOR
+    left.y--;right.y--;
+    graphics_draw_line(ctx,left,right);
+  #endif 
+  }
 }
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
@@ -141,6 +150,8 @@ static void window_unload(Window *window) {
 }
 
 static void init(void) {
+  autoconfig_init();
+  app_message_register_inbox_received(in_received_handler);
   
   window = window_create();
   window_set_window_handlers(window, (WindowHandlers) {
@@ -157,6 +168,7 @@ static void init(void) {
 
 static void deinit(void) {
   window_destroy(window);
+  autoconfig_deinit();
 }
 
 int main(void) {
