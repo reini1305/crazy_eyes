@@ -32,10 +32,12 @@ static void handle_bluetooth(bool connected){
 }
 
 static void blink_up_callback(void* data){
-  if(blink_y<0)
+  if(blink_y<0){
     blink_y=0;
+    blink_timer = NULL;
+  }
   else {
-    blink_y-=5;
+    blink_y-=8;
     blink_timer = app_timer_register(33,blink_up_callback,NULL);
   }
   layer_mark_dirty(hands_layer);
@@ -43,11 +45,20 @@ static void blink_up_callback(void* data){
 
 static void blink_down_callback(void* data){
   if (blink_y < 2*(eye_radius)) {
-    blink_y+=5;
+    blink_y+=8;
     blink_timer = app_timer_register(33,blink_down_callback,NULL);
   }
   else
     blink_timer = app_timer_register(33,blink_up_callback,NULL);
+  layer_mark_dirty(hands_layer);
+}
+
+static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
+  // Process tap on ACCEL_AXIS_X, ACCEL_AXIS_Y or ACCEL_AXIS_Z
+  // Direction is 1 or -1
+  // blink if enabled
+  if(getBlinking() && !blink_timer)
+      blink_timer = app_timer_register(300,blink_down_callback,NULL);
   layer_mark_dirty(hands_layer);
 }
 
@@ -110,27 +121,26 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   graphics_fill_circle(ctx,hour_center, 2);
   graphics_fill_circle(ctx,minute_center, 2);
   
-  if(getBlinking()) {
-    // Draw the blinking
-    const GPathInfo BOLT_PATH_INFO = {
-      .num_points = 4,
-      .points = (GPoint []) {{-eye_radius-3, -eye_radius-3}, {eye_radius+3, -eye_radius-3}, {eye_radius+3, eye_radius+3}, {-eye_radius-3, eye_radius+3}}
-    };
-    GPath *s_my_path_ptr = gpath_create(&BOLT_PATH_INFO);
-    GPoint blink_center = {
-      .x = (int16_t) left_eye_center.x,
-      .y = (int16_t) left_eye_center.y - 2 * eye_radius + blink_y - 6,
-    };
-    gpath_move_to(s_my_path_ptr, blink_center);
-    
-    // Fill the path:
-  #ifdef PBL_COLOR
-    graphics_context_set_fill_color(ctx, GColorChromeYellow);
-  #else
-    graphics_context_set_fill_color(ctx, GColorBlack);
-  #endif
-    gpath_draw_filled(ctx, s_my_path_ptr);
-  }
+  // Draw the blinking
+  const GPathInfo BOLT_PATH_INFO = {
+    .num_points = 4,
+    .points = (GPoint []) {{-eye_radius-3, -eye_radius-3}, {eye_radius+3, -eye_radius-3}, {eye_radius+3, eye_radius+13}, {-eye_radius-3, eye_radius-3}}
+  };
+  GPath *s_my_path_ptr = gpath_create(&BOLT_PATH_INFO);
+  GPoint blink_center = {
+    .x = (int16_t) left_eye_center.x,
+    .y = (int16_t) left_eye_center.y - 2 * eye_radius + blink_y - 6,
+  };
+  gpath_move_to(s_my_path_ptr, blink_center);
+  
+  // Fill the path:
+#ifdef PBL_COLOR
+  graphics_context_set_fill_color(ctx, GColorChromeYellow);
+#else
+  graphics_context_set_fill_color(ctx, GColorBlack);
+#endif
+  gpath_draw_filled(ctx, s_my_path_ptr);
+  gpath_destroy(s_my_path_ptr);
   
   if(getEyebrows()) {
     // Draw the eyebrows
@@ -168,7 +178,8 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
-  blink_timer = app_timer_register(33,blink_down_callback,NULL);
+  if(getBlinking() && !blink_timer)
+    blink_timer = app_timer_register(300,blink_down_callback,NULL);
   layer_mark_dirty(hands_layer);
 }
 
@@ -180,6 +191,8 @@ static void window_load(Window *window) {
   hands_layer = layer_create(bounds);
   layer_set_update_proc(hands_layer, hands_update_proc);
   layer_add_child(window_layer, hands_layer);
+  
+  accel_tap_service_subscribe(accel_tap_handler);
   
   // force update
   time_t now = time(NULL);
