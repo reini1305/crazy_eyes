@@ -129,7 +129,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   GPath *s_my_path_ptr = gpath_create(&BOLT_PATH_INFO);
   GPoint blink_center = {
     .x = (int16_t) left_eye_center.x,
-    .y = (int16_t) left_eye_center.y - 2 * eye_radius + blink_y - 6,
+    .y = (int16_t) left_eye_center.y - 2 * eye_radius + blink_y - 8,
   };
   gpath_move_to(s_my_path_ptr, blink_center);
   
@@ -174,7 +174,37 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     graphics_draw_line(ctx,left,right);
 #endif
   }
-
+  
+  //if(getMouth()) {
+    // Draw the mouth (with weekdays)
+    GRect mouth;
+    mouth.size.w = (3 * eye_radius + eye_distance)/7;
+    mouth.size.w*=7;
+    mouth.size.h = 20;
+    mouth.origin.x = (144 - mouth.size.w)/2;
+    mouth.origin.y = left_eye_center.y + eye_radius + 15;
+    graphics_context_set_fill_color(ctx,GColorWhite);
+    graphics_context_set_stroke_color(ctx,GColorBlack);
+    graphics_draw_round_rect(ctx,mouth,2);
+    
+    // Draw the weekday as black tooth
+    GRect tooth;
+    tooth.size.w = mouth.size.w / 7;
+    tooth.size.h = mouth.size.h;
+    tooth.origin.y = mouth.origin.y;
+    
+    for(int8_t weekday = 0; weekday < 7; weekday++) {
+      tooth.origin.x = mouth.origin.x + weekday * tooth.size.w;
+      if (weekday == t->tm_wday) {
+        graphics_context_set_fill_color(ctx,GColorBlack);
+        graphics_fill_rect(ctx,tooth,4,GCornersBottom);
+      } else {
+        graphics_context_set_fill_color(ctx,GColorWhite);
+        graphics_fill_rect(ctx,tooth,4,GCornersAll);
+        graphics_draw_round_rect(ctx,tooth,4);
+      }
+    }
+  //}
 }
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
