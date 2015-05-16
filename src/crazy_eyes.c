@@ -185,25 +185,39 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     mouth.origin.y = left_eye_center.y + eye_radius + 15;
     graphics_context_set_fill_color(ctx,GColorWhite);
     graphics_context_set_stroke_color(ctx,GColorBlack);
-    graphics_draw_round_rect(ctx,mouth,2);
-    
-    // Draw the weekday as black tooth
+
+    // Draw the teeth
     GRect tooth;
-    tooth.size.w = mouth.size.w / 7;
-    tooth.size.h = mouth.size.h;
+    tooth.size.w = mouth.size.w / 7 - 2;
+#ifdef PBL_COLOR
+    tooth.size.h = mouth.size.h-1;
     tooth.origin.y = mouth.origin.y;
-    
+#else
+    tooth.size.h = mouth.size.h-2;
+    tooth.origin.y = mouth.origin.y+1;
+#endif
+  
     for(int8_t weekday = 0; weekday < 7; weekday++) {
-      tooth.origin.x = mouth.origin.x + weekday * tooth.size.w;
+      tooth.origin.x = mouth.origin.x+1 + weekday * (tooth.size.w+2);
       if (weekday == t->tm_wday) {
         graphics_context_set_fill_color(ctx,GColorBlack);
         graphics_fill_rect(ctx,tooth,4,GCornersBottom);
       } else {
         graphics_context_set_fill_color(ctx,GColorWhite);
-        graphics_fill_rect(ctx,tooth,4,GCornersAll);
-        graphics_draw_round_rect(ctx,tooth,4);
+        graphics_fill_rect(ctx,tooth,4,GCornersBottom);
+#ifdef PBL_COLOR
+        //graphics_draw_round_rect(ctx,tooth,4);
+#endif
       }
     }
+#ifdef PBL_COLOR
+    graphics_context_set_stroke_color(ctx,GColorBlack);
+    graphics_context_set_stroke_width(ctx,2);
+#else
+    graphics_context_set_stroke_color(ctx,GColorWhite);
+#endif
+    graphics_draw_round_rect(ctx,mouth,4);
+
   //}
 }
 
