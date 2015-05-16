@@ -175,7 +175,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 #endif
   }
   
-  //if(getMouth()) {
+  if(getMouth()) {
     // Draw the mouth (with weekdays)
     GRect mouth;
     mouth.size.w = (3 * eye_radius + eye_distance)/7;
@@ -218,7 +218,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 #endif
     graphics_draw_round_rect(ctx,mouth,4);
 
-  //}
+  }
 }
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
