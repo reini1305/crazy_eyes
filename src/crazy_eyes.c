@@ -201,6 +201,12 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       tooth.origin.x = mouth.origin.x+1 + weekday * (tooth.size.w+2);
       if (weekday == t->tm_wday) {
         graphics_context_set_fill_color(ctx,GColorBlack);
+#ifdef PBL_COLOR
+        if((bluetooth_connected||!getBluetooth()))
+          graphics_context_set_fill_color(ctx,GColorBlack);
+        else
+          graphics_context_set_fill_color(ctx,GColorBlue);
+#endif
         graphics_fill_rect(ctx,tooth,4,GCornersBottom);
       } else {
         graphics_context_set_fill_color(ctx,GColorWhite);
