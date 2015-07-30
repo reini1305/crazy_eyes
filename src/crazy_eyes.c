@@ -196,10 +196,16 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     tooth.size.h = mouth.size.h-2;
     tooth.origin.y = mouth.origin.y+1;
 #endif
-  
+    // checkout with which weekday the week starts
+    int curr_weekday = t->tm_wday;
+    if(getMonday()) {
+      curr_weekday--;
+      if(curr_weekday<0)
+        curr_weekday = 6;
+    }
     for(int8_t weekday = 0; weekday < 7; weekday++) {
       tooth.origin.x = mouth.origin.x+1 + weekday * (tooth.size.w+2);
-      if (weekday == t->tm_wday) {
+      if (weekday == curr_weekday) {
         graphics_context_set_fill_color(ctx,GColorBlack);
 #ifdef PBL_COLOR
         if((bluetooth_connected||!getBluetooth()))
