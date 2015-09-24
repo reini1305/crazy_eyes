@@ -175,7 +175,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 #endif
   }
   
-  if(true){//getMouth()) {
+  if(getMouth()) {
     // Draw the mouth (with weekdays)
     GRect mouth;
     mouth.size.w = (3 * eye_radius + eye_distance)/7;
