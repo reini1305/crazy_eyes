@@ -175,13 +175,13 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 #endif
   }
   
-  if(getMouth()) {
+  if(true){//getMouth()) {
     // Draw the mouth (with weekdays)
     GRect mouth;
     mouth.size.w = (3 * eye_radius + eye_distance)/7;
     mouth.size.w*=7;
     mouth.size.h = 20;
-    mouth.origin.x = (144 - mouth.size.w)/2;
+    mouth.origin.x = (bounds.size.w - mouth.size.w)/2;
     mouth.origin.y = left_eye_center.y + eye_radius + 15;
     graphics_context_set_fill_color(ctx,GColorWhite);
     graphics_context_set_stroke_color(ctx,GColorBlack);
