@@ -10,3 +10,4 @@ The app can be found in the store: https://apps.getpebble.com/applications/553ce
 #Screenshots
 <img src="https://raw.githubusercontent.com/reini1305/crazy_eyes/master/store/pebble-screenshot_2015-04-26_15-54-51.png"></img>
 <img src="https://raw.githubusercontent.com/reini1305/crazy_eyes/master/store/pebble-screenshot_2015-04-26_15-42-45.png"></img>
+<img src="https://raw.githubusercontent.com/reini1305/crazy_eyes/master/store/pebble_screenshot_2015-10-13_08-38-14.png"></img>
