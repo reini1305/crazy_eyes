@@ -12,15 +12,28 @@ static int8_t blink_y = 0;
 static const int16_t eye_radius = 32;
 static const int16_t pupil_radius = 8;
 static const int16_t eye_distance = 6;
+static GColor background_color;
+
+static void update_color() {
+  background_color = GColorBlack;
+#ifdef PBL_COLOR
+  if(getRandcolor()) {
+    background_color = (GColor8){.argb=((uint8_t)(0xC0|rand()%64))};
+  }
+  else
+    background_color = GColorChromeYellow;
+#endif
+}
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
   autoconfig_in_received_handler(iter, context);
+  update_color();
   layer_mark_dirty(hands_layer);
 }
 static void handle_battery(BatteryChargeState battery)
 {
-   charge_percentage =  battery.charge_percent ;
-   layer_mark_dirty(hands_layer);
+  charge_percentage =  battery.charge_percent ;
+  layer_mark_dirty(hands_layer);
 }
 
 static void handle_bluetooth(bool connected){
@@ -78,11 +91,8 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   right_eye_center.y+=offset;
   
   // draw the eye circles
-#ifdef PBL_COLOR
-  graphics_context_set_fill_color(ctx, GColorChromeYellow);
-#else
-  graphics_context_set_fill_color(ctx, GColorBlack);
-#endif
+  graphics_context_set_fill_color(ctx, background_color);
+
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
   graphics_context_set_stroke_color(ctx,GColorWhite);
   graphics_context_set_fill_color(ctx, GColorWhite);
@@ -134,11 +144,8 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   gpath_move_to(s_my_path_ptr, blink_center);
   
   // Fill the path:
-#ifdef PBL_COLOR
-  graphics_context_set_fill_color(ctx, GColorChromeYellow);
-#else
-  graphics_context_set_fill_color(ctx, GColorBlack);
-#endif
+  graphics_context_set_fill_color(ctx, background_color);
+
   gpath_draw_filled(ctx, s_my_path_ptr);
   gpath_destroy(s_my_path_ptr);
   
@@ -235,6 +242,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
+  update_color();
   if(getBlinking() && !blink_timer)
     blink_timer = app_timer_register(300,blink_down_callback,NULL);
   layer_mark_dirty(hands_layer);
@@ -270,6 +278,7 @@ static void window_unload(Window *window) {
 }
 
 static void init(void) {
+  srand(time(NULL));
   autoconfig_init();
   app_message_register_inbox_received(in_received_handler);
   
