@@ -12,16 +12,11 @@ static int8_t blink_y = 0;
 static const int16_t eye_radius = 32;
 static const int16_t pupil_radius = 8;
 static const int16_t eye_distance = 6;
-static GColor background_color;
+static int background_color;
 
 static void update_color() {
-  background_color = GColorBlack;
 #ifdef PBL_COLOR
-  if(getRandcolor()) {
-    background_color = (GColor8){.argb=((uint8_t)(0xC0|rand()%64))};
-  }
-  else
-    background_color = GColorChromeYellow;
+    background_color=(background_color+1)%64;
 #endif
 }
 
@@ -78,6 +73,7 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 static void hands_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   GPoint center = grect_center_point(&bounds);
+  GColor color= PBL_IF_COLOR_ELSE((GColor8){.argb=((uint8_t)(0xC0|background_color))},GColorBlack);
   
   const int16_t pupil_center_dist = eye_radius - pupil_radius - 4;
   const int16_t offset = (watch_info_get_model() == WATCH_INFO_MODEL_PEBBLE_STEEL) ? 12:0;
@@ -91,7 +87,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   right_eye_center.y+=offset;
   
   // draw the eye circles
-  graphics_context_set_fill_color(ctx, background_color);
+  graphics_context_set_fill_color(ctx, color);
 
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
   graphics_context_set_stroke_color(ctx,GColorWhite);
@@ -144,7 +140,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   gpath_move_to(s_my_path_ptr, blink_center);
   
   // Fill the path:
-  graphics_context_set_fill_color(ctx, background_color);
+  graphics_context_set_fill_color(ctx, color);
 
   gpath_draw_filled(ctx, s_my_path_ptr);
   gpath_destroy(s_my_path_ptr);
@@ -279,6 +275,7 @@ static void window_unload(Window *window) {
 
 static void init(void) {
   srand(time(NULL));
+  background_color = rand()%64;
   autoconfig_init();
   app_message_register_inbox_received(in_received_handler);
   

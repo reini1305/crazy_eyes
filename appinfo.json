@@ -6,8 +6,7 @@
     "vibrate": 4,
     "blinking": 5,
     "mouth": 6,
-    "monday": 7,
-    "randcolor":8
+    "monday": 7
   },
   "preferences": {
     "embedded": true,
@@ -15,14 +14,6 @@
     "url": "http://musikkapelle-hollenegg.at/images/autoconfig.html",
     "description": "If you like what I'm doing, consider a donation: <br><a href='https://pledgie.com/campaigns/28156'><img alt='Click here to lend your support to: Christian Reinbachers Pebble Apps and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/28156.png?skin_name=chrome' border='0' ></a>",
     "items": [
-              {
-              "name": "randcolor",
-              "title": "Random background color?",
-              "type": "boolean",
-              "off-text": "No",
-              "on-text": "Yes",
-              "default": true
-              },
               {
               "name": "blinking",
               "title": "Blink on time change?",
@@ -105,8 +96,8 @@
         "chalk"
     ],
     "uuid": "c044c365-a5f0-4316-9208-1130d7a2c1e7",
-    "versionCode": 9,
-    "versionLabel": "1.9",
+    "versionCode": 10,
+    "versionLabel": "1.10",
     "watchapp": {
         "watchface": true
     }
