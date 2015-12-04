@@ -276,7 +276,7 @@ static void window_unload(Window *window) {
 static void init(void) {
   srand(time(NULL));
   background_color = rand()%64;
-  autoconfig_init();
+  autoconfig_init(100,100);
   app_message_register_inbox_received(in_received_handler);
   
   window = window_create();
