@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "autoconfig.h"
+#include "nightstand.h"
 
 static Layer *hands_layer;
 static Window *window;
@@ -238,10 +239,12 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
-  update_color();
-  if(getBlinking() && !blink_timer)
-    blink_timer = app_timer_register(300,blink_down_callback,NULL);
-  layer_mark_dirty(hands_layer);
+  if(!nightstand_window_update()) {
+    update_color();
+    if(getBlinking() && !blink_timer)
+      blink_timer = app_timer_register(300,blink_down_callback,NULL);
+    layer_mark_dirty(hands_layer);
+  }
 }
 
 static void window_load(Window *window) {
@@ -279,6 +282,7 @@ static void init(void) {
   autoconfig_init(100,100);
   app_message_register_inbox_received(in_received_handler);
   
+  nightstand_window_init();
   window = window_create();
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
@@ -295,6 +299,7 @@ static void init(void) {
 static void deinit(void) {
   window_destroy(window);
   autoconfig_deinit();
+  nightstand_window_deinit();
 }
 
 int main(void) {
