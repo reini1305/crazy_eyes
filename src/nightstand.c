@@ -21,6 +21,7 @@ typedef struct {
 }  BitmapInfo;
 
 static AccelData a_data;
+static BatteryChargeState b_data;
 static EffectLayer *effect_layer;
 static char time_text[] = "00:00";
 static TextLayer *night_time_layer;
@@ -252,19 +253,22 @@ bool nightstand_window_update(void){
   }
   layer_mark_dirty(text_layer_get_layer(night_time_layer));
   accel_service_peek(&a_data);
-  if(a_data.x<-900){ // rotate screen left
-    prv_effect_layer_remove_effect(effect_layer);
-    prv_effect_layer_add_effect(effect_layer,prv_effect_rotate_90_degrees,(void*)true);
-    if(!loaded)
-      window_stack_push(window,false);
-    return true;
-  }
-  else if(a_data.x>900) { //rotate screen right
-    prv_effect_layer_remove_effect(effect_layer);
-    prv_effect_layer_add_effect(effect_layer,prv_effect_rotate_90_degrees,(void*)false);
-    if(!loaded)
-      window_stack_push(window,false);
-    return true;
+  b_data = battery_state_service_peek();
+  if(b_data.is_plugged) {
+    if(a_data.x<-900){ // rotate screen left
+      prv_effect_layer_remove_effect(effect_layer);
+      prv_effect_layer_add_effect(effect_layer,prv_effect_rotate_90_degrees,(void*)true);
+      if(!loaded)
+        window_stack_push(window,false);
+      return true;
+    }
+    else if(a_data.x>900) { //rotate screen right
+      prv_effect_layer_remove_effect(effect_layer);
+      prv_effect_layer_add_effect(effect_layer,prv_effect_rotate_90_degrees,(void*)false);
+      if(!loaded)
+        window_stack_push(window,false);
+      return true;
+    }
   }
   if(loaded)
     window_stack_pop(false);

@@ -239,7 +239,11 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
-  if(!nightstand_window_update()) {
+  bool update_time = true;
+  if (getNightstand()) {
+    update_time = !nightstand_window_update();
+  }
+  if(update_time) {
     update_color();
     if(getBlinking() && !blink_timer)
       blink_timer = app_timer_register(300,blink_down_callback,NULL);
