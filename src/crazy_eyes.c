@@ -14,6 +14,12 @@ static const int16_t eye_radius = 32;
 static const int16_t pupil_radius = 8;
 static const int16_t eye_distance = 6;
 static int background_color;
+static bool googly_mode;
+static AppTimer *googly_timer;
+static int32_t googly_angle;
+static int32_t googly_acceleration;
+#define GOOGLY_ACCEL_INCREMENT (TRIG_MAX_ANGLE / 60)
+static AccelData googly_data;
 
 static void update_color() {
 #ifdef PBL_COLOR
@@ -62,13 +68,45 @@ static void blink_down_callback(void* data){
   layer_mark_dirty(hands_layer);
 }
 
+static void googly_update_countdown(void* data){
+  // read accelerometer data
+  accel_service_peek(&googly_data);
+ 
+  // super simple mode
+  //googly_angle = atan2_lookup(googly_data.x,googly_data.y);
+  
+  // linear acceleration
+  int32_t goal_angle = atan2_lookup(googly_data.x,googly_data.y);
+  if((abs(googly_angle-goal_angle) < GOOGLY_ACCEL_INCREMENT) && abs(googly_acceleration) < GOOGLY_ACCEL_INCREMENT) {
+    googly_acceleration = 0;
+  } else {
+    if(googly_angle<goal_angle)
+      googly_acceleration+=GOOGLY_ACCEL_INCREMENT;
+    else
+      googly_acceleration-=GOOGLY_ACCEL_INCREMENT;
+    googly_acceleration = (googly_acceleration*9)/10;
+  }
+  googly_angle+=googly_acceleration;
+  if (googly_data.did_vibrate) {
+    googly_mode=false;
+  }
+  if(googly_mode)
+    googly_timer = app_timer_register(33,googly_update_countdown,NULL);
+  layer_mark_dirty(hands_layer);
+}
+
 static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
   // Process tap on ACCEL_AXIS_X, ACCEL_AXIS_Y or ACCEL_AXIS_Z
   // Direction is 1 or -1
   // blink if enabled
-  if(getBlinking() && !blink_timer)
-      blink_timer = app_timer_register(300,blink_down_callback,NULL);
-  layer_mark_dirty(hands_layer);
+//  if(getBlinking() && !blink_timer)
+//      blink_timer = app_timer_register(300,blink_down_callback,NULL);
+  if(getGoogly()) {
+    if(!googly_mode) {
+      googly_timer = app_timer_register(33,googly_update_countdown,NULL);
+    }
+    googly_mode = !googly_mode;
+  }
 }
 
 static void hands_update_proc(Layer *layer, GContext *ctx) {
@@ -107,16 +145,20 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
   int32_t minute_angle =  TRIG_MAX_ANGLE * t->tm_min / 60;
-  GPoint minute_center = {
-    .x = (int16_t)(sin_lookup(minute_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + right_eye_center.x,
-    .y = (int16_t)(-cos_lookup(minute_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + right_eye_center.y,
-  };
   int32_t hour_angle =  (TRIG_MAX_ANGLE * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6);
-  GPoint hour_center = {
-    .x = (int16_t)(sin_lookup(hour_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + left_eye_center.x,
-    .y = (int16_t)(-cos_lookup(hour_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + left_eye_center.y,
-  };
-  
+  GPoint minute_center;
+  GPoint hour_center;
+  if (googly_mode) {
+    minute_center.x = (int16_t)(sin_lookup(googly_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + right_eye_center.x;
+    minute_center.y = (int16_t)(-cos_lookup(googly_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + right_eye_center.y;
+    hour_center.x = (int16_t)(sin_lookup(googly_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + left_eye_center.x;
+    hour_center.y = (int16_t)(-cos_lookup(googly_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + left_eye_center.y;
+  } else {
+    minute_center.x = (int16_t)(sin_lookup(minute_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + right_eye_center.x;
+    minute_center.y = (int16_t)(-cos_lookup(minute_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + right_eye_center.y;
+    hour_center.x = (int16_t)(sin_lookup(hour_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + left_eye_center.x;
+    hour_center.y = (int16_t)(-cos_lookup(hour_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + left_eye_center.y;
+  }
   // Draw the pupils
   graphics_context_set_fill_color(ctx, GColorBlack);
   graphics_fill_circle(ctx,hour_center, pupil_radius);
@@ -293,7 +335,9 @@ static void init(void) {
     .unload = window_unload,
   });
   
-  
+  googly_mode=false;
+  googly_angle = 0;
+  googly_acceleration = 0;
   // Push the window onto the stack
   const bool animated = true;
   window_stack_push(window, animated);
