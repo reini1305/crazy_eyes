@@ -1,5 +1,5 @@
 {
-  "version": "1.14.0",
+  "version": "1.15.0",
   "author": "Christian Reinbacher",
   "private": true,
   "dependencies": {"nightstand": "^1.0.1"},
