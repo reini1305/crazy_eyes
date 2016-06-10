@@ -1,0 +1,84 @@
+[
+{
+  "type": "heading",
+  "id": "main-heading",
+  "defaultValue": "Crazy Eyes Configuration",
+  "size": 1
+},
+{
+  "type": "text",
+  "defaultValue": "If you like what I'm doing, consider a donation: <br><a href='https://pledgie.com/campaigns/28156'><img alt='Click here to lend your support to: Christian Reinbachers Pebble Apps and make a donation at pledgie.com!</a></br>",
+  "id": "donationtext"
+},
+{
+  "type": "section",
+  "items": [
+            {
+            "type": "heading",
+            "defaultValue": "Settings"
+            },
+            {
+            "type": "toggle",
+            "appKey": "googly",
+            "label": "Shake for Googly Eyes",
+            "defaultValue": false
+            },
+            {
+            "type": "toggle",
+            "appKey": "blinking",
+            "label": "Blink on the minute",
+            "defaultValue": false
+            },
+            {
+            "type": "toggle",
+            "appKey": "eyebrows",
+            "label": "Show eyebrows",
+            "defaultValue": true
+            },
+            {
+            "type": "slider",
+            "appKey": "angryness",
+            "defaultValue": 11,
+            "label": "Slider",
+            "description": "Angryness of eyebrows: 0=desperate ... 10=angry, 11=battery level",
+            "min": 0,
+            "max": 11,
+            "step": 1
+            },
+            {
+            "type": "toggle",
+            "appKey": "mouth",
+            "label": "Show mouth",
+            "defaultValue": false
+            },
+            {
+            "type": "toggle",
+            "appKey": "bluetooth",
+            "label": "Show bluetooth status",
+            "defaultValue": true
+            },
+            {
+            "type": "toggle",
+            "appKey": "vibrate",
+            "label": "Vibrate on disconnect",
+            "defaultValue": false
+            },
+            {
+            "type": "toggle",
+            "appKey": "monday",
+            "label": "First weekday = monday",
+            "defaultValue": false
+            },
+            {
+            "type": "toggle",
+            "appKey": "nightstand",
+            "label": "Nightstand mode when on charger",
+            "defaultValue": true
+            }
+            ]
+},
+{
+  "type": "submit",
+  "defaultValue": "Save"
+}
+]

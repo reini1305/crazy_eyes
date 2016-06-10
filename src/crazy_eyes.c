@@ -1,6 +1,6 @@
 #include <pebble.h>
-#include "autoconfig.h"
-#include "nightstand.h"
+//#include "autoconfig.h"
+#include <nightstand/nightstand.h>
 
 static Layer *hands_layer;
 static Window *window;
@@ -21,6 +21,38 @@ static int32_t googly_acceleration;
 #define GOOGLY_ACCEL_INCREMENT (TRIG_MAX_ANGLE / 60)
 static AccelData googly_data;
 
+// Preferences
+#define KEY_SETTINGS 1
+typedef struct settings{
+  bool show_eyebrows;
+  bool show_mouth;
+  bool bluetooth_status;
+  bool vibrate_on_disconnect;
+  bool minute_blink;
+  bool first_day_monday;
+  bool nightstand_mode;
+  bool googly_eyes;
+  uint8_t angryness;
+} settings;
+
+static settings s_settings;
+
+static void loadSettings(void) {
+  if(persist_exists(KEY_SETTINGS)) {
+    persist_read_data(KEY_SETTINGS,&s_settings,sizeof(settings));
+  } else {
+    s_settings.angryness=11;
+    s_settings.bluetooth_status=true;
+    s_settings.first_day_monday=true;
+    s_settings.googly_eyes=false;
+    s_settings.minute_blink=false;
+    s_settings.nightstand_mode=true;
+    s_settings.show_eyebrows=true;
+    s_settings.show_mouth=false;
+    s_settings.vibrate_on_disconnect=true;
+  }
+}
+
 static void update_color() {
 #ifdef PBL_COLOR
     background_color=(background_color+1)%64;
@@ -28,7 +60,30 @@ static void update_color() {
 }
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
-  autoconfig_in_received_handler(iter, context);
+  
+  // Read preferences
+  Tuple *t = dict_find(iter, MESSAGE_KEY_eyebrows);
+  if(t) {
+    s_settings.show_eyebrows = t->value->int32 == 1;
+  }
+  if((t = dict_find(iter, MESSAGE_KEY_bluetooth)))
+    s_settings.bluetooth_status = t->value->int32 == 1;
+  if((t = dict_find(iter, MESSAGE_KEY_blinking)))
+    s_settings.minute_blink = t->value->int32 == 1;
+  if((t = dict_find(iter, MESSAGE_KEY_monday)))
+    s_settings.first_day_monday = t->value->int32 == 1;
+  if((t = dict_find(iter, MESSAGE_KEY_googly)))
+  s_settings.googly_eyes = t->value->int32 == 1;
+  if((t = dict_find(iter, MESSAGE_KEY_eyebrows)))
+  s_settings.show_eyebrows = t->value->int32 == 1;
+  if((t = dict_find(iter, MESSAGE_KEY_nightstand)))
+  s_settings.nightstand_mode = t->value->int32 == 1;
+  if((t = dict_find(iter, MESSAGE_KEY_mouth)))
+  s_settings.show_mouth = t->value->int32 == 1;
+  if((t = dict_find(iter, MESSAGE_KEY_vibrate)))
+  s_settings.vibrate_on_disconnect = t->value->int32 == 1;
+  if((t = dict_find(iter, MESSAGE_KEY_angryness)))
+  s_settings.angryness = t->value->int32;
   update_color();
   layer_mark_dirty(hands_layer);
 }
@@ -40,7 +95,7 @@ static void handle_battery(BatteryChargeState battery)
 
 static void handle_bluetooth(bool connected){
   bluetooth_connected = connected;
-  if(getVibrate() && !connected)
+  if(s_settings.vibrate_on_disconnect && !connected)
     vibes_long_pulse();
   first_time = false;
   layer_mark_dirty(hands_layer);
@@ -101,7 +156,7 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
   // blink if enabled
 //  if(getBlinking() && !blink_timer)
 //      blink_timer = app_timer_register(300,blink_down_callback,NULL);
-  if(getGoogly()) {
+  if(s_settings.googly_eyes) {
     if(!googly_mode) {
       googly_timer = app_timer_register(33,googly_update_countdown,NULL);
     }
@@ -188,12 +243,11 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   gpath_draw_filled(ctx, s_my_path_ptr);
   gpath_destroy(s_my_path_ptr);
   
-  if(getEyebrows()) {
+  if(s_settings.show_eyebrows) {
     // Draw the eyebrows
-    int16_t angryness = getAngryness();
-    int16_t charge_diff = (angryness == 11) ? ((charge_percentage /5) -10) : (angryness*2-10);
-    int16_t bluetooth_diff_x = (bluetooth_connected||!getBluetooth())? 0:eye_radius;
-    int16_t bluetooth_diff_y = (bluetooth_connected||!getBluetooth())? 0:charge_diff/2;
+    int16_t charge_diff = (s_settings.angryness == 11) ? ((charge_percentage /5) -10) : (s_settings.angryness*2-10);
+    int16_t bluetooth_diff_x = (bluetooth_connected||!s_settings.bluetooth_status)? 0:eye_radius;
+    int16_t bluetooth_diff_y = (bluetooth_connected||!s_settings.bluetooth_status)? 0:charge_diff/2;
     GPoint left = {
       .x = (int16_t) left_eye_center.x-eye_radius+bluetooth_diff_x,
       .y = (int16_t) left_eye_center.y-eye_radius-20-charge_diff+bluetooth_diff_y,
@@ -221,7 +275,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 #endif
   }
   
-  if(getMouth()) 
+  if(s_settings.show_mouth)
   {
     // Draw the mouth (with weekdays)
     GRect mouth;
@@ -245,7 +299,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 #endif
     // checkout with which weekday the week starts
     int curr_weekday = t->tm_wday;
-    if(getMonday()) {
+    if(s_settings.first_day_monday) {
       curr_weekday--;
       if(curr_weekday<0)
         curr_weekday = 6;
@@ -255,7 +309,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       if (weekday == curr_weekday) {
         graphics_context_set_fill_color(ctx,GColorBlack);
 #ifdef PBL_COLOR
-        if((bluetooth_connected||!getBluetooth()))
+        if((bluetooth_connected||!s_settings.bluetooth_status))
           graphics_context_set_fill_color(ctx,GColorBlack);
         else
           graphics_context_set_fill_color(ctx,GColorBlue);
@@ -282,12 +336,12 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   bool update_time = true;
-  if (getNightstand()) {
+  if (s_settings.nightstand_mode) {
     update_time = !nightstand_window_update();
   }
   if(update_time) {
     update_color();
-    if(getBlinking() && !blink_timer)
+    if(s_settings.minute_blink && !blink_timer)
       blink_timer = app_timer_register(300,blink_down_callback,NULL);
     layer_mark_dirty(hands_layer);
   }
@@ -325,7 +379,8 @@ static void window_unload(Window *window) {
 static void init(void) {
   srand(time(NULL));
   background_color = rand()%64;
-  autoconfig_init(100,100);
+  loadSettings();
+  app_message_open(100,100);
   app_message_register_inbox_received(in_received_handler);
   
   nightstand_window_init();
@@ -346,8 +401,8 @@ static void init(void) {
 
 static void deinit(void) {
   window_destroy(window);
-  autoconfig_deinit();
   nightstand_window_deinit();
+  persist_write_data(KEY_SETTINGS,&s_settings,sizeof(settings));
 }
 
 int main(void) {

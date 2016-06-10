@@ -1,0 +1,51 @@
+{
+  "version": "1.14.0",
+  "author": "Christian Reinbacher",
+  "private": true,
+  "dependencies": {"nightstand": "^1.0.1"},
+  "keywords": [
+    "pebble-app"
+  ],
+  "pebble": {
+    "sdkVersion": "3",
+    "resources": {
+      "media": [
+        {
+          "menuIcon": true,
+          "type": "png",
+          "name": "IMAGE_MENU_ICON",
+          "file": "images/logo.png"
+        }
+      ]
+    },
+    "projectType": "native",
+    "uuid": "c044c365-a5f0-4316-9208-1130d7a2c1e7",
+    "messageKeys": {
+      "eyebrows": 1,
+      "angryness": 2,
+      "bluetooth": 3,
+      "vibrate": 4,
+      "blinking": 5,
+      "mouth": 6,
+      "monday": 7,
+      "nightstand":8,
+      "googly":9
+    },
+    "enableMultiJS": true,
+    "displayName": "Crazy Eyes",
+    "watchapp": {
+      "onlyShownOnCommunication": false,
+      "hiddenApp": false,
+      "watchface": true
+    },
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk"
+    ],
+    "capabilities": [
+      "configurable"
+    ]
+  },
+  "name": "Crazy Eyes"
+}
