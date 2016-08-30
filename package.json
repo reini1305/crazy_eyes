@@ -2,7 +2,9 @@
   "version": "1.15.0",
   "author": "Christian Reinbacher",
   "private": true,
-  "dependencies": {"nightstand": "^1.0.1"},
+  "dependencies": {
+    "nightstand": "^1.0.3"
+  },
   "keywords": [
     "pebble-app"
   ],
@@ -28,8 +30,8 @@
       "blinking": 5,
       "mouth": 6,
       "monday": 7,
-      "nightstand":8,
-      "googly":9
+      "nightstand": 8,
+      "googly": 9
     },
     "enableMultiJS": true,
     "displayName": "Crazy Eyes",
@@ -41,7 +43,8 @@
     "targetPlatforms": [
       "aplite",
       "basalt",
-      "chalk"
+      "chalk",
+      "diorite"
     ],
     "capabilities": [
       "configurable"
