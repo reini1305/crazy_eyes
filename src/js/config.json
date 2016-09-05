@@ -65,12 +65,6 @@
             },
             {
             "type": "toggle",
-            "messageKey": "monday",
-            "label": "First weekday = monday",
-            "defaultValue": false
-            },
-            {
-            "type": "toggle",
             "messageKey": "nightstand",
             "label": "Nightstand mode when on charger",
             "defaultValue": true

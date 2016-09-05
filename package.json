@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": "Christian Reinbacher",
   "private": true,
   "dependencies": {
@@ -30,7 +30,6 @@
       "vibrate": 4,
       "blinking": 5,
       "mouth": 6,
-      "monday": 7,
       "nightstand": 8,
       "googly": 9
     },

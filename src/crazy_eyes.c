@@ -70,8 +70,6 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     s_settings.bluetooth_status = t->value->int32 == 1;
   if((t = dict_find(iter, MESSAGE_KEY_blinking)))
     s_settings.minute_blink = t->value->int32 == 1;
-  if((t = dict_find(iter, MESSAGE_KEY_monday)))
-    s_settings.first_day_monday = t->value->int32 == 1;
   if((t = dict_find(iter, MESSAGE_KEY_googly)))
   s_settings.googly_eyes = t->value->int32 == 1;
   if((t = dict_find(iter, MESSAGE_KEY_eyebrows)))
@@ -258,28 +256,21 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     };
 
     graphics_draw_line(ctx,left,right);
-// #ifndef PBL_COLOR
-//     left.y--;right.y--;
-//     graphics_draw_line(ctx,left,right);
-// #endif
+
     left.x = (int16_t) right_eye_center.x-eye_radius;
     left.y = (int16_t) right_eye_center.y-eye_radius-20+charge_diff;
     right.x = (int16_t) right_eye_center.x+eye_radius-bluetooth_diff_x;
     right.y = (int16_t) right_eye_center.y-eye_radius-20-charge_diff+bluetooth_diff_y,
 
     graphics_draw_line(ctx,left,right);
-// #ifndef PBL_COLOR
-//     left.y--;right.y--;
-//     graphics_draw_line(ctx,left,right);
-// #endif
   }
 
-  if(true)//s_settings.show_mouth)
+  if(s_settings.show_mouth)
   {
-    // Draw the mouth (with weekdays)
+    // Draw the mouth (day in binary)
     GRect mouth;
-    mouth.size.w = (3 * eye_radius + eye_distance)/7;
-    mouth.size.w*=7;
+    mouth.size.w = (3 * eye_radius + eye_distance)/8;
+    mouth.size.w*=8;
     mouth.size.h = 20;
     mouth.origin.x = (bounds.size.w - mouth.size.w)/2;
     mouth.origin.y = left_eye_center.y + eye_radius + 10;
@@ -288,32 +279,15 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 
     // Draw the teeth
     GRect tooth;
-    tooth.size.w = mouth.size.w / 7 - 2;
+    tooth.size.w = mouth.size.w / 8 - 2;
     tooth.size.h = mouth.size.h-1;
     tooth.origin.y = mouth.origin.y;
 
-    // checkout with which weekday the week starts
-    int curr_weekday = t->tm_wday;
-    if(s_settings.first_day_monday) {
-      curr_weekday--;
-      if(curr_weekday<0)
-        curr_weekday = 6;
-    }
-    for(int8_t weekday = 0; weekday < 7; weekday++) {
-      tooth.origin.x = mouth.origin.x+1 + weekday * (tooth.size.w+2);
-      if (weekday == curr_weekday) {
-        graphics_context_set_fill_color(ctx,GColorBlack);
-#ifdef PBL_COLOR
-        if((bluetooth_connected||!s_settings.bluetooth_status))
-          graphics_context_set_fill_color(ctx,GColorBlack);
-        else
-          graphics_context_set_fill_color(ctx,GColorBlue);
-#endif
-        graphics_fill_rect(ctx,tooth,4,GCornersBottom);
-      } else {
-        graphics_context_set_fill_color(ctx,GColorWhite);
-        graphics_fill_rect(ctx,tooth,4,GCornersBottom);
-      }
+    int curr_day = t->tm_mday;
+    for(int8_t tooth_id = 0; tooth_id < 8; tooth_id++) {
+      tooth.origin.x = mouth.origin.x+1 + tooth_id * (tooth.size.w+2);
+      graphics_context_set_fill_color(ctx,(curr_day & (1 << (7-tooth_id)))?GColorBlack:GColorWhite);
+      graphics_fill_rect(ctx,tooth,4,GCornersBottom);
     }
     graphics_context_set_stroke_color(ctx,GColorBlack);
     graphics_context_set_stroke_width(ctx,2);
