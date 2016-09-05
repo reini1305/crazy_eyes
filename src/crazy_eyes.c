@@ -165,7 +165,7 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 }
 
 static void hands_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(layer);
+  GRect bounds = layer_get_unobstructed_bounds(layer);
   GPoint center = grect_center_point(&bounds);
   GColor color= PBL_IF_COLOR_ELSE((GColor8){.argb=((uint8_t)(0xC0|background_color))},GColorLightGray);
 
@@ -283,7 +283,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     mouth.size.w*=7;
     mouth.size.h = 20;
     mouth.origin.x = (bounds.size.w - mouth.size.w)/2;
-    mouth.origin.y = left_eye_center.y + eye_radius + 15;
+    mouth.origin.y = left_eye_center.y + eye_radius + 10;
     graphics_context_set_fill_color(ctx,GColorWhite);
     graphics_context_set_stroke_color(ctx,GColorBlack);
 

@@ -19,59 +19,59 @@
             },
             {
             "type": "toggle",
-            "appKey": "googly",
+            "messageKey": "googly",
             "label": "Shake for Googly Eyes",
             "defaultValue": false
             },
             {
             "type": "toggle",
-            "appKey": "blinking",
+            "messageKey": "blinking",
             "label": "Blink on the minute",
             "defaultValue": false
             },
             {
             "type": "toggle",
-            "appKey": "eyebrows",
+            "messageKey": "eyebrows",
             "label": "Show eyebrows",
             "defaultValue": true
             },
             {
             "type": "slider",
-            "appKey": "angryness",
+            "messageKey": "angryness",
             "defaultValue": 11,
-            "label": "Slider",
-            "description": "Angryness of eyebrows: 0=desperate ... 10=angry, 11=battery level",
+            "label": "Angryness of eyebrows",
+            "description": "0=desperate ... 10=angry, 11=battery level",
             "min": 0,
             "max": 11,
             "step": 1
             },
             {
             "type": "toggle",
-            "appKey": "mouth",
+            "messageKey": "mouth",
             "label": "Show mouth",
             "defaultValue": false
             },
             {
             "type": "toggle",
-            "appKey": "bluetooth",
+            "messageKey": "bluetooth",
             "label": "Show bluetooth status",
             "defaultValue": true
             },
             {
             "type": "toggle",
-            "appKey": "vibrate",
+            "messageKey": "vibrate",
             "label": "Vibrate on disconnect",
             "defaultValue": false
             },
             {
             "type": "toggle",
-            "appKey": "monday",
+            "messageKey": "monday",
             "label": "First weekday = monday",
             "defaultValue": false
             },
             {
             "type": "toggle",
-            "appKey": "nightstand",
+            "messageKey": "nightstand",
             "label": "Nightstand mode when on charger",
             "defaultValue": true
             }
