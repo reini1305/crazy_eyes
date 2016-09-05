@@ -269,8 +269,8 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   {
     // Draw the mouth (day in binary)
     GRect mouth;
-    mouth.size.w = (3 * eye_radius + eye_distance)/8;
-    mouth.size.w*=8;
+    mouth.size.w = (3 * eye_radius + eye_distance)/5;
+    mouth.size.w*=5;
     mouth.size.h = 20;
     mouth.origin.x = (bounds.size.w - mouth.size.w)/2;
     mouth.origin.y = left_eye_center.y + eye_radius + 10;
@@ -279,14 +279,14 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 
     // Draw the teeth
     GRect tooth;
-    tooth.size.w = mouth.size.w / 8 - 2;
+    tooth.size.w = mouth.size.w / 5 - 2;
     tooth.size.h = mouth.size.h-1;
     tooth.origin.y = mouth.origin.y;
 
     int curr_day = t->tm_mday;
-    for(int8_t tooth_id = 0; tooth_id < 8; tooth_id++) {
+    for(int8_t tooth_id = 0; tooth_id < 5; tooth_id++) {
       tooth.origin.x = mouth.origin.x+1 + tooth_id * (tooth.size.w+2);
-      graphics_context_set_fill_color(ctx,(curr_day & (1 << (7-tooth_id)))?GColorBlack:GColorWhite);
+      graphics_context_set_fill_color(ctx,(curr_day & (1 << (4-tooth_id)))?GColorBlack:GColorWhite);
       graphics_fill_rect(ctx,tooth,4,GCornersBottom);
     }
     graphics_context_set_stroke_color(ctx,GColorBlack);
