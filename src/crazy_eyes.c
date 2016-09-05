@@ -189,12 +189,11 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   graphics_fill_circle(ctx,left_eye_center, eye_radius);
   graphics_fill_circle(ctx,right_eye_center, eye_radius);
 
-#ifdef PBL_COLOR
   graphics_context_set_stroke_width(ctx,2);
   graphics_context_set_stroke_color(ctx,GColorBlack);
   graphics_draw_circle(ctx,left_eye_center, eye_radius+1);
   graphics_draw_circle(ctx,right_eye_center, eye_radius+1);
-#endif
+
 
   // calculate the center of the hour and minute circles (pupils)
   time_t now = time(NULL);
@@ -259,23 +258,23 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     };
 
     graphics_draw_line(ctx,left,right);
-#ifndef PBL_COLOR
-    left.y--;right.y--;
-    graphics_draw_line(ctx,left,right);
-#endif
+// #ifndef PBL_COLOR
+//     left.y--;right.y--;
+//     graphics_draw_line(ctx,left,right);
+// #endif
     left.x = (int16_t) right_eye_center.x-eye_radius;
     left.y = (int16_t) right_eye_center.y-eye_radius-20+charge_diff;
     right.x = (int16_t) right_eye_center.x+eye_radius-bluetooth_diff_x;
     right.y = (int16_t) right_eye_center.y-eye_radius-20-charge_diff+bluetooth_diff_y,
 
     graphics_draw_line(ctx,left,right);
-#ifndef PBL_COLOR
-    left.y--;right.y--;
-    graphics_draw_line(ctx,left,right);
-#endif
+// #ifndef PBL_COLOR
+//     left.y--;right.y--;
+//     graphics_draw_line(ctx,left,right);
+// #endif
   }
 
-  if(s_settings.show_mouth)
+  if(true)//s_settings.show_mouth)
   {
     // Draw the mouth (with weekdays)
     GRect mouth;
@@ -290,13 +289,9 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     // Draw the teeth
     GRect tooth;
     tooth.size.w = mouth.size.w / 7 - 2;
-#ifdef PBL_COLOR
     tooth.size.h = mouth.size.h-1;
     tooth.origin.y = mouth.origin.y;
-#else
-    tooth.size.h = mouth.size.h-2;
-    tooth.origin.y = mouth.origin.y+1;
-#endif
+
     // checkout with which weekday the week starts
     int curr_weekday = t->tm_wday;
     if(s_settings.first_day_monday) {
@@ -318,17 +313,10 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       } else {
         graphics_context_set_fill_color(ctx,GColorWhite);
         graphics_fill_rect(ctx,tooth,4,GCornersBottom);
-#ifdef PBL_COLOR
-        //graphics_draw_round_rect(ctx,tooth,4);
-#endif
       }
     }
-#ifdef PBL_COLOR
     graphics_context_set_stroke_color(ctx,GColorBlack);
     graphics_context_set_stroke_width(ctx,2);
-#else
-    graphics_context_set_stroke_color(ctx,GColorWhite);
-#endif
     graphics_draw_round_rect(ctx,mouth,4);
 
   }
