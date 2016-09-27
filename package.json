@@ -18,6 +18,11 @@
           "type": "png",
           "name": "IMAGE_MENU_ICON",
           "file": "images/logo.png"
+        },
+        {
+          "type": "png",
+          "name": "IMAGE_DROP",
+          "file": "images/drop.png"
         }
       ]
     },
@@ -47,7 +52,8 @@
       "diorite"
     ],
     "capabilities": [
-      "configurable"
+      "configurable",
+      "health"
     ]
   },
   "name": "Crazy Eyes"
