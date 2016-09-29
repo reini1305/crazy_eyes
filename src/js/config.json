@@ -68,6 +68,16 @@
             "messageKey": "nightstand",
             "label": "Nightstand mode when on charger",
             "defaultValue": true
+            },
+            {
+              "type": "slider",
+              "messageKey": "hrthreshold",
+              "defaultValue": 100,
+              "label": "Heartrate threshold",
+              "description": "Make Crazy Eyes sweat when over threshold (Pebble 2 only)",
+              "min": 60,
+              "max": 180,
+              "step": 1
             }
             ]
 },

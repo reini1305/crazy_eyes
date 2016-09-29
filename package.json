@@ -1,5 +1,5 @@
 {
-  "version": "2.2.0",
+  "version": "2.3.0",
   "author": "Christian Reinbacher",
   "private": true,
   "dependencies": {
@@ -36,7 +36,8 @@
       "blinking": 5,
       "mouth": 6,
       "nightstand": 8,
-      "googly": 9
+      "googly": 9,
+      "hrthreshold": 10
     },
     "enableMultiJS": true,
     "displayName": "Crazy Eyes",

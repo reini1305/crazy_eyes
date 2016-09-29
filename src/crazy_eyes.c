@@ -25,7 +25,7 @@ static GBitmap *drop_bitmap;
 #endif
 
 // Preferences
-#define KEY_SETTINGS 1
+#define KEY_SETTINGS 2
 typedef struct settings{
   bool show_eyebrows;
   bool show_mouth;
@@ -36,6 +36,7 @@ typedef struct settings{
   bool nightstand_mode;
   bool googly_eyes;
   uint8_t angryness;
+  uint8_t hr_threshold;
 } settings;
 
 static settings s_settings;
@@ -53,6 +54,7 @@ static void loadSettings(void) {
     s_settings.show_eyebrows=true;
     s_settings.show_mouth=false;
     s_settings.vibrate_on_disconnect=true;
+    s_settings.hr_threshold=100;
   }
 }
 
@@ -85,6 +87,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   s_settings.vibrate_on_disconnect = t->value->int32 == 1;
   if((t = dict_find(iter, MESSAGE_KEY_angryness)))
   s_settings.angryness = t->value->int32;
+  if((t = dict_find(iter, MESSAGE_KEY_hrthreshold)))
+  s_settings.hr_threshold = t->value->int32;
   update_color();
   layer_mark_dirty(hands_layer);
 }
@@ -300,7 +304,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 #ifdef PBL_PLATFORM_DIORITE
   // draw the sweat drop
   HealthValue hrmValue = health_service_peek_current_value(HealthMetricHeartRateBPM);
-  if(hrmValue>100) {
+  if(hrmValue>s_settings.hr_threshold) {
     graphics_context_set_compositing_mode(ctx,GCompOpSet);
     graphics_draw_bitmap_in_rect(ctx,drop_bitmap,
                                  GRect(right_eye_center.x+eye_radius-30,right_eye_center.y-eye_radius-40,28,40));
