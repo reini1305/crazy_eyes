@@ -9,10 +9,15 @@ static bool bluetooth_connected = true;
 static bool first_time = true;
 static AppTimer *blink_timer;
 static int8_t blink_y = 0;
-
+#ifdef PBL_PLATFORM_EMERY
+static const int16_t eye_radius = 40;
+static const int16_t pupil_radius = 10;
+static const int16_t eye_distance = 8;
+#else
 static const int16_t eye_radius = 32;
 static const int16_t pupil_radius = 8;
 static const int16_t eye_distance = 6;
+#endif
 static int background_color;
 static bool googly_mode;
 static AppTimer *googly_timer;
