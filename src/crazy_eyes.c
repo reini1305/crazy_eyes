@@ -29,6 +29,11 @@ static AccelData googly_data;
 static GBitmap *drop_bitmap;
 #endif
 
+const GPathInfo BLOODSHOT_PATH_INFO = {
+  .num_points = 4,
+  .points = (GPoint []) {{0, 0}, {0, 5}, {5, 8}, {0, 15}}
+};
+static GPath *s_bloodshot_path_ptr;
 // Preferences
 #define KEY_SETTINGS 2
 typedef struct settings{
@@ -208,6 +213,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   // calculate the center of the hour and minute circles (pupils)
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
+  bool is_halloween = t->tm_mon==9 && t->tm_mday==31;
   int32_t minute_angle =  TRIG_MAX_ANGLE * t->tm_min / 60;
   int32_t hour_angle =  (TRIG_MAX_ANGLE * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6);
   GPoint minute_center;
@@ -224,7 +230,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     hour_center.y = (int16_t)(-cos_lookup(hour_angle) * (int32_t)pupil_center_dist / TRIG_MAX_RATIO) + left_eye_center.y;
   }
   // Draw the pupils
-  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_context_set_fill_color(ctx, is_halloween?GColorRed:GColorBlack);
   graphics_fill_circle(ctx,hour_center, pupil_radius);
   graphics_fill_circle(ctx,minute_center, pupil_radius);
 
@@ -234,23 +240,46 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   graphics_fill_circle(ctx,hour_center, 2);
   graphics_fill_circle(ctx,minute_center, 2);
 
-  // Draw the blinking
-  const GPathInfo BOLT_PATH_INFO = {
-    .num_points = 4,
-    .points = (GPoint []) {{-eye_radius-3, -eye_radius-3}, {eye_radius+3, -eye_radius-3}, {eye_radius+3, eye_radius+13}, {-eye_radius-3, eye_radius-3}}
-  };
-  GPath *s_my_path_ptr = gpath_create(&BOLT_PATH_INFO);
-  GPoint blink_center = {
-    .x = (int16_t) left_eye_center.x,
-    .y = (int16_t) left_eye_center.y - 2 * eye_radius + blink_y - 8,
-  };
-  gpath_move_to(s_my_path_ptr, blink_center);
+  // Draw bloodshot eyes
+  if(!googly_mode && is_halloween){
+    graphics_context_set_stroke_color(ctx, GColorRed);
+    s_bloodshot_path_ptr = gpath_create(&BLOODSHOT_PATH_INFO);
+    gpath_rotate_to(s_bloodshot_path_ptr, minute_angle);
+    minute_angle = TRIG_MAX_ANGLE * ((t->tm_min+30)%60) / 60;
+    GPoint bloodshot_center;
+    bloodshot_center.x = (int16_t)(sin_lookup(minute_angle) * (int32_t)(pupil_center_dist-4) / TRIG_MAX_RATIO) + right_eye_center.x;
+    bloodshot_center.y = (int16_t)(-cos_lookup(minute_angle) * (int32_t)(pupil_center_dist-4) / TRIG_MAX_RATIO) + right_eye_center.y;
+    gpath_move_to(s_bloodshot_path_ptr, bloodshot_center);
+    gpath_draw_outline_open(ctx, s_bloodshot_path_ptr);
 
-  // Fill the path:
-  graphics_context_set_fill_color(ctx, color);
+    gpath_rotate_to(s_bloodshot_path_ptr, hour_angle);
+    hour_angle =  (TRIG_MAX_ANGLE * ((((t->tm_hour+6) % 12) * 6) + ((t->tm_min+30)%60 / 10))) / (12 * 6);
+    bloodshot_center.x = (int16_t)(sin_lookup(hour_angle) * (int32_t)(pupil_center_dist-4) / TRIG_MAX_RATIO) + left_eye_center.x;
+    bloodshot_center.y = (int16_t)(-cos_lookup(hour_angle) * (int32_t)(pupil_center_dist-4) / TRIG_MAX_RATIO) + left_eye_center.y;
+    gpath_move_to(s_bloodshot_path_ptr, bloodshot_center);
+    gpath_draw_outline_open(ctx, s_bloodshot_path_ptr);
+    gpath_destroy(s_bloodshot_path_ptr);
+  }
 
-  gpath_draw_filled(ctx, s_my_path_ptr);
-  gpath_destroy(s_my_path_ptr);
+  if(s_settings.minute_blink){
+    // Draw the blinking
+    const GPathInfo BOLT_PATH_INFO = {
+      .num_points = 4,
+      .points = (GPoint []) {{-eye_radius-3, -eye_radius-3}, {eye_radius+3, -eye_radius-3}, {eye_radius+3, eye_radius+13}, {-eye_radius-3, eye_radius-3}}
+    };
+    GPath* s_my_path_ptr = gpath_create(&BOLT_PATH_INFO);
+    GPoint blink_center = {
+      .x = (int16_t) left_eye_center.x,
+      .y = (int16_t) left_eye_center.y - 2 * eye_radius + blink_y - 8,
+    };
+    gpath_move_to(s_my_path_ptr, blink_center);
+
+    // Fill the path:
+    graphics_context_set_fill_color(ctx, color);
+
+    gpath_draw_filled(ctx, s_my_path_ptr);
+    gpath_destroy(s_my_path_ptr);
+  }
 
   if(s_settings.show_eyebrows) {
     // Draw the eyebrows
@@ -267,6 +296,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       .y = (int16_t) left_eye_center.y-eye_radius-20+charge_diff,
     };
 
+    graphics_context_set_stroke_color(ctx,GColorBlack);
     graphics_draw_line(ctx,left,right);
 
     left.x = (int16_t) right_eye_center.x-eye_radius;
