@@ -204,7 +204,11 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   graphics_fill_circle(ctx,left_eye_center, eye_radius);
   graphics_fill_circle(ctx,right_eye_center, eye_radius);
 
+#ifdef PBL_PLATFORM_EMERY
+  graphics_context_set_stroke_width(ctx,3);
+#else
   graphics_context_set_stroke_width(ctx,2);
+#endif
   graphics_context_set_stroke_color(ctx,GColorBlack);
   graphics_draw_circle(ctx,left_eye_center, eye_radius+1);
   graphics_draw_circle(ctx,right_eye_center, eye_radius+1);
@@ -332,7 +336,11 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       graphics_fill_rect(ctx,tooth,4,GCornersBottom);
     }
     graphics_context_set_stroke_color(ctx,GColorBlack);
-    graphics_context_set_stroke_width(ctx,2);
+    #ifdef PBL_PLATFORM_EMERY
+      graphics_context_set_stroke_width(ctx,3);
+    #else
+      graphics_context_set_stroke_width(ctx,2);
+    #endif
     graphics_draw_round_rect(ctx,mouth,4);
 
   }

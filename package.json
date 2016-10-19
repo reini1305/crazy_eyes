@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "nightstand": "^1.0.5",
-    "pebble-clay": "^1.0.2"
+    "pebble-clay": "^1.0.3"
   },
   "keywords": [
     "pebble-app"
