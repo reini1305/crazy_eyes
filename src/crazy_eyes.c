@@ -25,7 +25,7 @@ static int32_t googly_angle;
 static int32_t googly_acceleration;
 #define GOOGLY_ACCEL_INCREMENT (TRIG_MAX_ANGLE / 60)
 static AccelData googly_data;
-#ifdef PBL_PLATFORM_DIORITE
+#if defined(PBL_PLATFORM_DIORITE) || defined(PBL_PLATFORM_EMERY)
 static GBitmap *drop_bitmap;
 #endif
 
@@ -344,7 +344,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     graphics_draw_round_rect(ctx,mouth,4);
 
   }
-#ifdef PBL_PLATFORM_DIORITE
+#if defined(PBL_PLATFORM_DIORITE)||defined(PBL_PLATFORM_EMERY)
   // draw the sweat drop
   HealthValue hrmValue = health_service_peek_current_value(HealthMetricHeartRateBPM);
   if(hrmValue>s_settings.hr_threshold) {
@@ -378,7 +378,7 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, hands_layer);
 
   accel_tap_service_subscribe(accel_tap_handler);
-#ifdef PBL_PLATFORM_DIORITE
+#if defined(PBL_PLATFORM_DIORITE)||defined(PBL_PLATFORM_EMERY)
   drop_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_DROP);
 #endif
 
@@ -397,7 +397,7 @@ static void window_load(Window *window) {
 
 static void window_unload(Window *window) {
   layer_destroy(hands_layer);
-#ifdef PBL_PLATFORM_DIORITE
+#if defined(PBL_PLATFORM_DIORITE)||defined(PBL_PLATFORM_EMERY)
   gbitmap_destroy(drop_bitmap);
 #endif
   tick_timer_service_unsubscribe();
